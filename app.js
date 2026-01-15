@@ -274,4 +274,126 @@ function printBorrowForms(item) {
     }, 500);
 }
 
-print.console("Verison: 1.2/1.15.26");
+// --- CHECK OUT / CHECK IN LOGIC ---
+
+// 1. OPEN CHECK OUT MODAL
+function openCheckOut() {
+    const dataList = document.getElementById('availableItemsList');
+    dataList.innerHTML = ''; // Clear old options
+
+    // Filter for items that are currently in the Locker
+    const availableItems = inventoryData.filter(i => i.status === 'Locker');
+
+    availableItems.forEach(item => {
+        const option = document.createElement('option');
+        // This format allows searching by Asset, Name, or Manufacturer
+        option.value = `${item.assetId} - ${item.productName} (${item.manufacturer})`;
+        // We store the real Doc ID in a data attribute? No, datalist doesn't support hidden IDs easily.
+        // We will match the string on submit.
+        dataList.appendChild(option);
+    });
+
+    // Set Default Time (Now + 30 mins)
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    
+    // Format to YYYY-MM-DDTHH:MM for the input
+    // Note: timezone offset handling is tricky in vanilla JS, this is a simple local string approach
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    document.getElementById('checkOutTime').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('checkOutName').value = '';
+    document.getElementById('checkOutItemInput').value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('checkOutModal'));
+    modal.show();
+}
+
+// 2. PERFORM CHECK OUT
+function performCheckOut() {
+    const inputVal = document.getElementById('checkOutItemInput').value;
+    const borrowerType = document.getElementById('checkOutType').value;
+    const borrowerName = document.getElementById('checkOutName').value;
+    const returnTime = document.getElementById('checkOutTime').value;
+
+    // Find the item based on the input string "Asset - Name (Manu)"
+    // We check if the item's Asset ID is at the start of the string
+    const item = inventoryData.find(i => inputVal.startsWith(i.assetId));
+
+    if (!item) {
+        alert("Invalid Item Selected. Please select from the list.");
+        return;
+    }
+
+    const updateData = {
+        status: borrowerType, // 'Student' or 'Staff'
+        borrowerName: borrowerName,
+        returnDate: returnTime
+    };
+
+    db.collection("inventory").doc(item.id).update(updateData).then(() => {
+        // Close Modal
+        const modalEl = document.getElementById('checkOutModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+
+        // Print Labels (using the item data merged with update data)
+        printBorrowForms({ ...item, ...updateData });
+    }).catch(err => console.error(err));
+}
+
+
+// 3. OPEN CHECK IN MODAL
+function openCheckIn() {
+    const dataList = document.getElementById('borrowedItemsList');
+    dataList.innerHTML = '';
+
+    // Filter for items that are OUT (Student or Staff)
+    const borrowedItems = inventoryData.filter(i => i.status === 'Student' || i.status === 'Staff');
+
+    borrowedItems.forEach(item => {
+        const option = document.createElement('option');
+        option.value = `${item.assetId} - ${item.productName} (Held by: ${item.borrowerName})`;
+        dataList.appendChild(option);
+    });
+
+    document.getElementById('checkInItemInput').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('checkInModal'));
+    modal.show();
+}
+
+// 4. PERFORM CHECK IN
+function performCheckIn() {
+    const inputVal = document.getElementById('checkInItemInput').value;
+    
+    // Find item by Asset ID match
+    const item = inventoryData.find(i => inputVal.startsWith(i.assetId));
+
+    if (!item) {
+        alert("Invalid Item Selected.");
+        return;
+    }
+
+    if(!confirm(`Confirm return of: ${item.productName}?`)) return;
+
+    const updateData = {
+        status: 'Locker',
+        borrowerName: '',
+        returnDate: ''
+    };
+
+    db.collection("inventory").doc(item.id).update(updateData).then(() => {
+        alert("Item Checked In Successfully.");
+        const modalEl = document.getElementById('checkInModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+    });
+}
+
+print.console("Verison: 1.3/1.15.26");
+
