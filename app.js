@@ -11,20 +11,22 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.firestore();
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
 
 // --- AUTH LOGIC ---
-// Restrict to specific domain if desired
-const ALLOWED_DOMAIN = "madison.k12.in.us"; // Change to your school domain or set to null to disable
+// Restrict to specific domain if desired. Set to null to allow any Google account.
+const ALLOWED_DOMAIN = "madison.k12.in.us"; 
 
 function login() {
     auth.signInWithPopup(provider).then((result) => {
         const email = result.user.email;
         if (ALLOWED_DOMAIN && !email.endsWith(ALLOWED_DOMAIN)) {
-            alert("Access Restricted: Please use your school account.");
+            alert(`Access Restricted: Please use a valid ${ALLOWED_DOMAIN} account.`);
             auth.signOut();
         }
     }).catch((error) => console.error(error));
@@ -32,8 +34,14 @@ function login() {
 
 function logout() { auth.signOut(); }
 
+// Monitor Auth State
 auth.onAuthStateChanged((user) => {
     if (user) {
+        // Double check domain on persistent login
+        if (ALLOWED_DOMAIN && !user.email.endsWith(ALLOWED_DOMAIN)) {
+             auth.signOut();
+             return;
+        }
         document.getElementById('login-screen').classList.add('d-none');
         document.getElementById('app-content').classList.remove('d-none');
         document.getElementById('user-display').innerText = `User: ${user.email}`;
@@ -48,6 +56,7 @@ auth.onAuthStateChanged((user) => {
 let inventoryData = [];
 let editingId = null;
 
+// Real-time listener for Inventory
 function loadInventory() {
     db.collection("inventory").onSnapshot((snapshot) => {
         const list = document.getElementById('inventory-list');
@@ -70,9 +79,11 @@ function loadInventory() {
                 <td><span class="badge ${getStatusBadge(item.status)}">${item.status}</span></td>
                 <td>${item.borrowerName || '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-primary" onclick="editItem('${item.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
-                    <button class="btn btn-sm btn-dark" onclick="printTags('${item.id}')"><i class="fas fa-tag"></i> Tags</button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-primary" onclick="editItem('${item.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-dark" onclick="printTags('${item.id}')"><i class="fas fa-tag"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
                 </td>
             `;
             list.appendChild(row);
@@ -113,11 +124,11 @@ function editItem(id) {
     
     toggleBorrowFields();
     
-    // Bootstrap 5 Modal toggle logic
     const modal = new bootstrap.Modal(document.getElementById('itemModal'));
     modal.show();
 }
 
+// Show/Hide Borrow fields based on status dropdown
 function toggleBorrowFields() {
     const status = document.getElementById('status').value;
     const fields = document.getElementById('borrowFields');
@@ -130,6 +141,7 @@ function toggleBorrowFields() {
     }
 }
 
+// Save (Add or Update)
 function saveItem() {
     const id = document.getElementById('docId').value;
     const status = document.getElementById('status').value;
@@ -168,21 +180,31 @@ function deleteItem(id) {
 }
 
 function closeModal() {
+    // Get the modal element
     const modalEl = document.getElementById('itemModal');
+    // Get the instance (bootstrap 5 method)
     const modal = bootstrap.Modal.getInstance(modalEl);
-    modal.hide();
+    if(modal) {
+        modal.hide();
+    }
+    // Fallback: manually hide backdrop if it gets stuck
+    const backdrop = document.querySelector('.modal-backdrop');
+    if(backdrop) {
+        backdrop.remove();
+    }
 }
 
 // --- PRINTING LOGIC ---
 
-// 1. Print Inventory Tags (Batch 2 tags onto one 4x6 sheet)
-// Note: Since user wants "batch these", we can print two identical or two different.
-// For simplicity, this function prints ONE asset's tag twice on one sheet (Top/Bottom).
+/**
+ * Print Inventory Tags
+ * Generates two identical 4x3 tags on a single 4x6 sheet (Top/Bottom)
+ */
 function printTags(id) {
     const item = inventoryData.find(i => i.id === id);
     const printArea = document.getElementById('print-area');
     
-    // HTML for two 4x3 tags stacked vertically
+    // Inject HTML into the print area
     printArea.innerHTML = `
         <div class="label-sheet-4x6">
             <div class="batch-container">
@@ -201,14 +223,22 @@ function printTags(id) {
             </div>
         </div>
     `;
-    window.print();
+    
+    // DELAY PRINTING to allow browser to render the styles and HTML
+    setTimeout(() => {
+        window.print();
+    }, 500);
 }
 
-// 2. Print Borrow Forms (2 separate 4x6 labels)
+/**
+ * Print Borrow Forms
+ * Generates two 4x6 labels: School Copy and Student Copy
+ */
 function printBorrowForms(item) {
     const printArea = document.getElementById('print-area');
     const terms = "Only for this day only, must be back by printed time, if not returned by borrow time, a request for replacement form will be issued.";
     
+    // Helper to generate the form HTML
     const formHTML = (copyType) => `
         <div class="label-sheet-4x6">
             <div class="borrow-form">
@@ -234,9 +264,11 @@ function printBorrowForms(item) {
         </div>
     `;
 
-    // Create 2 sheets: One for School, One for Student
+    // Inject School Copy + Student Copy
     printArea.innerHTML = formHTML("SCHOOL COPY") + formHTML("STUDENT COPY");
     
-    // Use a timeout to ensure DOM renders before print dialog
-    setTimeout(() => window.print(), 500);
+    // DELAY PRINTING to allow browser to render the styles and HTML
+    setTimeout(() => {
+        window.print();
+    }, 500);
 }
