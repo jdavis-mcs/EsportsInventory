@@ -1,0 +1,86 @@
+/* Screen Styles */
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+#print-area { display: none; } /* Hide print labels on screen */
+
+/* PRINT STYLES */
+@media print {
+    /* Hide everything that isn't the print area */
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* Page Setup for 4x6 Label Printer */
+    @page {
+        size: 4in 6in;
+        margin: 0;
+    }
+
+    /* Container for a single 4x6 label sheet */
+    .label-sheet-4x6 {
+        width: 4in;
+        height: 6in;
+        page-break-after: always;
+        position: relative;
+        overflow: hidden;
+        background: white;
+        color: black;
+        box-sizing: border-box;
+        border: 1px solid #ddd; /* Helper border, remove for final */
+    }
+
+    /* --- LAYOUT 1: Inventory Tags (Two 4x3s on one 4x6) --- */
+    .batch-container {
+        display: flex;
+        flex-direction: column; /* Stack vertically */
+        height: 100%;
+    }
+
+    .tag-4x3 {
+        width: 4in;
+        height: 3in;
+        padding: 0.2in;
+        border-bottom: 1px dashed #000; /* Cut line guide */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .tag-4x3:last-child { border-bottom: none; }
+    
+    .tag-title { font-size: 14pt; font-weight: bold; }
+    .tag-asset { font-size: 24pt; font-weight: 900; margin: 10px 0; }
+    .tag-meta { font-size: 10pt; }
+
+    /* --- LAYOUT 2: Borrow Form (Full 4x6) --- */
+    .borrow-form {
+        padding: 0.25in;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        font-family: monospace; /* Looks more like a receipt/contract */
+    }
+
+    .borrow-header { text-align: center; border-bottom: 2px solid black; padding-bottom: 5px; }
+    .borrow-header h2 { margin: 0; font-size: 18pt; }
+    
+    .borrow-body { font-size: 11pt; }
+    .borrow-body p { margin: 5px 0; }
+    
+    .borrow-terms {
+        font-size: 8pt;
+        border: 1px solid black;
+        padding: 5px;
+        margin: 10px 0;
+        background: #f0f0f0; /* Will print gray if supported */
+    }
+    
+    .borrow-sign { margin-top: 20px; }
+    .sign-line { border-bottom: 1px solid black; height: 30px; margin-top: 5px; }
+}
