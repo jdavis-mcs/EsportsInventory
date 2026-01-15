@@ -1,4 +1,4 @@
-print("Verison: 1.1/1.15.26");
+print.console("Verison: 1.2/1.15.26");
 
 // --- FIREBASE CONFIGURATION ---
 // REPLACE THIS OBJECT WITH YOUR FIREBASE CONSOLE CONFIG
@@ -211,7 +211,7 @@ function printTags(id) {
         <div class="label-sheet-4x6">
             <div class="batch-container">
                 <div class="tag-4x3">
-                    <div><img src="esportslogo.png" alt="Esports Logo" style="width:200px;height:200px;"></div>
+                    <div><img src="esportslogo.png" alt="Esports Logo" style="width:50px;height:50px;"></div>
                     <div class="tag-title">PROPERTY OF MJHS ESPORTS</div>
                     <div class="tag-asset">${item.assetId}</div>
                     <div class="tag-meta">${item.manufacturer} - ${item.productName}</div>
@@ -275,6 +275,7 @@ function printBorrowForms(item) {
         window.print();
     }, 500);
 }
+
 
 
 
