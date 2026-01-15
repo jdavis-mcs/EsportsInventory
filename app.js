@@ -1,3 +1,5 @@
+print("Verison: 1.1/1.15.26");
+
 // --- FIREBASE CONFIGURATION ---
 // REPLACE THIS OBJECT WITH YOUR FIREBASE CONSOLE CONFIG
 const firebaseConfig = {
@@ -273,6 +275,7 @@ function printBorrowForms(item) {
         window.print();
     }, 500);
 }
+
 
 
 
