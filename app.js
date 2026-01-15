@@ -209,7 +209,7 @@ function printTags(id) {
         <div class="label-sheet-4x6">
             <div class="batch-container">
                 <div class="tag-4x3">
-                    <div><img src="esportslogo.png" alt="Esports Logo"></div>
+                    <div><img src="esportslogo.png" alt="Esports Logo" style="width:200px;height:200px;"></div>
                     <div class="tag-title">PROPERTY OF MJHS ESPORTS</div>
                     <div class="tag-asset">${item.assetId}</div>
                     <div class="tag-meta">${item.manufacturer} - ${item.productName}</div>
@@ -273,5 +273,6 @@ function printBorrowForms(item) {
         window.print();
     }, 500);
 }
+
 
 
