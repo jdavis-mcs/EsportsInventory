@@ -1,48 +1,78 @@
-/* Screen Styles */
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-#print-area { display: none; } /* Hide print labels on screen */
+/* --- SCREEN STYLES --- */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+}
 
-/* PRINT STYLES */
+/* Hide the print area explicitly on screens */
+#print-area { 
+    display: none !important; 
+} 
+
+/* --- PRINT STYLES --- */
 @media print {
-    /* Hide everything that isn't the print area */
-    body * { visibility: hidden; }
-    #print-area, #print-area * { visibility: visible; }
-    #print-area {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
+    /* 1. FORCE HIDE all screen elements */
+    #login-screen, 
+    #app-content, 
+    .modal, 
+    .modal-backdrop,
+    nav {
+        display: none !important;
     }
 
-    /* Page Setup for 4x6 Label Printer */
+    /* 2. RESET BODY settings to allow full-page printing */
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background-color: white;
+        overflow: visible !important;
+    }
+
+    /* 3. FORCE SHOW the print area */
+    #print-area {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+        z-index: 9999; /* Ensure it sits on top of everything */
+    }
+
+    /* 4. PRINTER SETTINGS for 4x6 Label Printer */
     @page {
         size: 4in 6in;
-        margin: 0;
+        margin: 0; /* Critical for thermal printers to not cut off edges */
     }
+
+    /* --- LAYOUTS --- */
 
     /* Container for a single 4x6 label sheet */
     .label-sheet-4x6 {
         width: 4in;
         height: 6in;
-        page-break-after: always;
+        page-break-after: always; /* Forces printer to cut/feed next label */
         position: relative;
         overflow: hidden;
         background: white;
         color: black;
         box-sizing: border-box;
-        border: 1px solid #ddd; /* Helper border, remove for final */
+        /* Optional: Border for debugging alignment, remove for final */
+        /* border: 1px solid #ddd; */
     }
 
-    /* --- LAYOUT 1: Inventory Tags (Two 4x3s on one 4x6) --- */
+    /* LAYOUT 1: Inventory Tags (Two 4x3s on one 4x6) */
     .batch-container {
         display: flex;
-        flex-direction: column; /* Stack vertically */
+        flex-direction: column;
         height: 100%;
     }
 
     .tag-4x3 {
         width: 4in;
-        height: 3in;
+        height: 3in; /* Exactly half of 6in */
         padding: 0.2in;
         border-bottom: 1px dashed #000; /* Cut line guide */
         display: flex;
@@ -50,37 +80,47 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         justify-content: center;
         align-items: center;
         text-align: center;
+        box-sizing: border-box;
     }
-    .tag-4x3:last-child { border-bottom: none; }
+    .tag-4x3:last-child { 
+        border-bottom: none; 
+    }
     
-    .tag-title { font-size: 14pt; font-weight: bold; }
+    .tag-title { font-size: 14pt; font-weight: bold; text-transform: uppercase;}
     .tag-asset { font-size: 24pt; font-weight: 900; margin: 10px 0; }
     .tag-meta { font-size: 10pt; }
 
-    /* --- LAYOUT 2: Borrow Form (Full 4x6) --- */
+    /* LAYOUT 2: Borrow Form (Full 4x6) */
     .borrow-form {
-        padding: 0.25in;
+        padding: 0.2in;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         height: 100%;
-        font-family: monospace; /* Looks more like a receipt/contract */
+        font-family: 'Courier New', Courier, monospace; /* Receipt style */
     }
 
-    .borrow-header { text-align: center; border-bottom: 2px solid black; padding-bottom: 5px; }
-    .borrow-header h2 { margin: 0; font-size: 18pt; }
+    .borrow-header { 
+        text-align: center; 
+        border-bottom: 2px solid black; 
+        padding-bottom: 5px; 
+    }
+    .borrow-header h2 { margin: 0; font-size: 16pt; }
     
-    .borrow-body { font-size: 11pt; }
-    .borrow-body p { margin: 5px 0; }
+    .borrow-body { font-size: 10pt; flex-grow: 1; padding-top: 10px; }
+    .borrow-body p { margin: 5px 0; line-height: 1.2; }
     
     .borrow-terms {
-        font-size: 8pt;
+        font-size: 7pt;
         border: 1px solid black;
         padding: 5px;
-        margin: 10px 0;
-        background: #f0f0f0; /* Will print gray if supported */
+        margin: 5px 0;
+        /* Ensure background prints */
+        background-color: #f0f0f0 !important; 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact;
     }
     
-    .borrow-sign { margin-top: 20px; }
-    .sign-line { border-bottom: 1px solid black; height: 30px; margin-top: 5px; }
+    .borrow-sign { margin-top: 15px; }
+    .sign-line { border-bottom: 1px solid black; height: 20px; margin-top: 5px; }
 }
