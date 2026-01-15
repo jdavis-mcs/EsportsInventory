@@ -29,14 +29,25 @@
 
         <div class="row">
             <div class="col-md-2">
+                <div class="d-grid gap-2 mb-4">
+                    <button class="btn btn-warning btn-lg" onclick="openCheckOut()">
+                        <i class="fas fa-sign-out-alt"></i> CHECK OUT
+                    </button>
+                    <button class="btn btn-info btn-lg" onclick="openCheckIn()">
+                        <i class="fas fa-sign-in-alt"></i> CHECK IN
+                    </button>
+                </div>
+            
                 <button class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="resetForm()">
                     <i class="fas fa-plus"></i> Add New Item
                 </button>
+                
                 <div class="card p-3">
                     <h5>Stats</h5>
                     <p>Total Items: <span id="total-count">0</span></p>
                     <p>Borrowed: <span id="borrowed-count">0</span></p>
                 </div>
+            </div>
             </div>
 
             <div class="col-md-10">
@@ -122,6 +133,76 @@
         </div>
     </div>
 
+    <div class="modal fade" id="checkOutModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Check Out Equipment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="checkOutForm" onsubmit="event.preventDefault(); performCheckOut();">
+                    <div class="mb-3">
+                        <label>Select Item to Borrow</label>
+                        <input class="form-control" list="availableItemsList" id="checkOutItemInput" placeholder="Type Asset ID, Name, or Brand..." required>
+                        <datalist id="availableItemsList">
+                            </datalist>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label>Borrower Type</label>
+                            <select class="form-select" id="checkOutType">
+                                <option value="Student">Student</option>
+                                <option value="Staff">Staff</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label>Borrower Name</label>
+                            <input type="text" class="form-control" id="checkOutName" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Return By Time</label>
+                        <input type="datetime-local" class="form-control" id="checkOutTime" required>
+                        <small class="text-muted">Defaults to 30 mins from now.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Confirm & Print Label</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="checkInModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Check In Equipment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="checkInForm" onsubmit="event.preventDefault(); performCheckIn();">
+                    <div class="mb-3">
+                        <label>Select Item to Return</label>
+                        <input class="form-control" list="borrowedItemsList" id="checkInItemInput" placeholder="Type Asset ID..." required>
+                        <datalist id="borrowedItemsList">
+                            </datalist>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Ensure item is not damaged before confirming receipt.
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">Confirm Receipt</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div id="print-area">
         </div>
 
@@ -133,3 +214,4 @@
 </body>
 
 </html>
+
