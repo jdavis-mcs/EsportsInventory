@@ -209,7 +209,8 @@ function printTags(id) {
         <div class="label-sheet-4x6">
             <div class="batch-container">
                 <div class="tag-4x3">
-                    <div class="tag-title">PROPERTY OF ESPORTS</div>
+                    <div><img src="esportslogo.png" alt="Esports Logo">
+                    <div class="tag-title">PROPERTY OF MJHS ESPORTS</div>
                     <div class="tag-asset">${item.assetId}</div>
                     <div class="tag-meta">${item.manufacturer} - ${item.productName}</div>
                     <div class="tag-meta">SN: ${item.serialNumber}</div>
@@ -272,3 +273,4 @@ function printBorrowForms(item) {
         window.print();
     }, 500);
 }
+
